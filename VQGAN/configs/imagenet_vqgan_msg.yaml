@@ -1,0 +1,30 @@
+model:
+  base_learning_rate: 1e-4
+  target: taming.models.vqgan13.VQModel
+  params:
+    n_modal: 4
+    in_channels: 1
+    ckpt_path : 
+    ignore_keys: []
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 9
+    num_workers: 3
+    train:
+      target: taming.data.brats-msg.CustomTrain
+      params:
+        data_path: 
+        phase: train
+    validation:
+      target: taming.data.brats-msg.CustomTest
+      params:
+        data_path: 
+        phase: val
+
+
+lightning:
+  trainer:
+    max_epochs: 100
+    check_val_every_n_epoch: 1
+    benchmark: True

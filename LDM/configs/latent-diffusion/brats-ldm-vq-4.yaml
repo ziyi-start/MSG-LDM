@@ -1,0 +1,114 @@
+model:
+  base_learning_rate: 1.0e-04
+  target: ldm.models.diffusion.ddpm.LatentDiffusion
+  params:
+    ckpt_path:  
+    linear_start: 0.0015
+    linear_end: 0.0195
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    first_stage_key: image
+    cond_stage_key: image
+    image_size: 24
+    #image_size: 28
+    channels: 16
+    #channels: 8
+    cond_stage_trainable: false
+    conditioning_key: hybrid
+    monitor: val/loss_simple_ema
+    # scheduler_config: # 10000 warmup steps
+    #   target: ldm.lr_scheduler.LambdaLinearScheduler
+    #   params:
+    #     warm_up_steps: [10000]
+    #     cycle_lengths: [10000000000000]
+    #     f_start: [1.e-6]
+    #     f_max: [1.]
+    #     f_min: [ 1.]
+
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        num_classes: 
+        image_size: 24
+        #image_size: 28
+        in_channels: 272
+        #in_channels: 272
+        out_channels: 16
+        #out_channels: 8
+        model_channels: 128
+        attention_resolutions:
+        #note: this isn\t actually the resolution but
+        # the downsampling factor, i.e. this corresnponds to
+        # attention on spatial resolution 8,16,32, as the
+        # spatial reolution of the latents is 32 for f8
+        - 4
+        - 2
+        num_res_blocks: 1
+        channel_mult:
+        - 1
+        - 1
+        - 2
+        # - 4
+        num_head_channels: 32
+        transformer_depth: 1
+        use_spatial_transformer: False
+        # context_dim: 4
+    first_stage_config:
+      target: ldm.models.vqgan.VQModel
+      params:
+        ckpt_path: 
+        embed_dim: 4
+        n_embed: 8192
+        ddconfig:
+          double_z: False
+          z_channels: 4
+          resolution: 192
+          in_channels: 1          # 单模态输入，每次 forward 一个模态
+          out_ch: 1               # 单模态输出
+          ch: 128
+          num_groups: 32
+          ch_mult: [1, 1, 2, 4]
+          num_res_blocks: 2
+          attn_resolutions: [16]
+          dropout: 0.0
+
+    cond_stage_config: __is_unconditional__
+    structural_features_config:
+      target: ldm.models.vqgan-msg.VQModel
+      params:
+        n_modal: 4
+        in_channels: 1
+        ckpt_path : 
+        ignore_keys: []
+
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 9
+    num_workers: 3
+    train:
+      target: ldm.taming.data.brats3.CustomTrain
+      params:
+        data_path: 
+        phase: train
+    validation:
+      target: ldm.taming.data.brats3.CustomTest
+      params:
+        data_path: 
+        phase: val
+
+lightning:
+  callbacks:
+    image_logger:
+      target: main.ImageLogger
+      params:
+        batch_frequency: 350
+        max_images: 8
+        increase_log_steps: False
+
+  trainer:
+    max_epochs: 100
+    check_val_every_n_epoch: 1
+    benchmark: True
