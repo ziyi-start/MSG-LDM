@@ -1,0 +1,52 @@
+# Paper settings: batch 12, lr 4.5e-6, 128 base channels,
+# ch_mult [1,1,2,4], KL weight 1e-6, LPIPS weight 1.0.
+model:
+  base_learning_rate: 4.5e-06
+  target: taming.models.vae_kl.VAEKL
+  params:
+    ckpt_path:
+    embed_dim: 4
+    ddconfig:
+      double_z: True
+      z_channels: 4
+      resolution: 192
+      in_channels: 1
+      out_ch: 1
+      ch: 128
+      ch_mult: [1, 1, 2, 4]
+      num_res_blocks: 2
+      attn_resolutions: [24]
+      dropout: 0.0
+    lossconfig:
+      target: taming.modules.losses.vae_perceptual.L1PerceptualKLLoss
+      params:
+        kl_weight: 1.0e-6
+        perceptual_weight: 1.0
+        logvar_init: 0.0
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 12
+    num_workers: 2
+    train:
+      target: taming.data.brats_recon.CustomTrain
+      params:
+        data_path: ../data/BraTS20/TrainingData
+        # The paper does not specify a validation split; 10% of the training
+        # subjects are held out for checkpoint selection and never optimized.
+        val_ratio: 0.1
+        seed: 42
+    validation:
+      target: taming.data.brats_recon.CustomVal
+      params:
+        data_path: ../data/BraTS20/TrainingData
+        val_ratio: 0.1
+        seed: 42
+
+lightning:
+  trainer:
+    max_epochs: 100
+    check_val_every_n_epoch: 1
+    benchmark: True
+    gpus: [0]

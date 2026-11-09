@@ -1,0 +1,34 @@
+# Paper settings: batch 12, lr 1e-4, lambda_seg 1.0, lambda_KL 0.1.
+model:
+  base_learning_rate: 1e-4
+  target: model.VQModel
+  params:
+    n_modal: 4
+    in_channels: 1
+    max_epochs: 200
+    ckpt_path:
+    ignore_keys: []
+data:
+  target: main.DataModuleFromConfig
+  params:
+    batch_size: 12
+    num_workers: 9
+    train:
+      target: dataset.CustomTrain
+      params:
+        data_path: ../data/BraTS20/TrainingData
+        # The paper does not specify a validation split; 10% of the training
+        # subjects are held out for checkpoint selection and never optimized.
+        val_ratio: 0.1
+        seed: 42
+    validation:
+      target: dataset.CustomVal
+      params:
+        data_path: ../data/BraTS20/TrainingData
+        val_ratio: 0.1
+        seed: 42
+lightning:
+  trainer:
+    max_epochs: 200
+    check_val_every_n_epoch: 1
+    benchmark: True

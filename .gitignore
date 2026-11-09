@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Training outputs
+logs/
+outputs/
+eval_outputs/
+lightning_logs/
+events.out.tfevents.*
+*.log
+
+# Weights and cached tensors
+*.ckpt
+*.pt
+*.pth
+*.npz
+
+# Data
+data/*
+!data/README.md
+checkpoints/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

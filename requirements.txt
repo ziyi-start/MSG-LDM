@@ -1,0 +1,17 @@
+# Tested with Python 3.8 and PyTorch Lightning 1.x.
+torch>=1.7
+torchvision>=0.8
+pytorch-lightning>=1.0,<1.5
+torchmetrics>=0.2
+omegaconf>=2.0,<2.2
+numpy>=1.19
+Pillow>=8.0
+tqdm>=4.50
+einops>=0.3
+packaging>=20.0
+monai>=0.6
+nibabel>=3.2
+pytorch-msssim>=0.2
+setproctitle>=1.1
+six>=1.15
+requests>=2.24
